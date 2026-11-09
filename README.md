@@ -67,11 +67,11 @@ powershell -NoProfile -ExecutionPolicy Bypass -File tools\build-apk.ps1
 
 `harmony-app/` 是 Stage 模型 ArkTS 工程，NAPI 通过 `dlopen("libnode.so")` + `dlsym("_ZN4node5StartEiPPc")` 在 detached thread 调用 `node::Start`，`Web` 组件加载 `127.0.0.1:3080` 并注入同一份 `inject.js/css`。
 
-**当前没有可直接安装的 HAP。** 仓库不包含 `libnode.so` / `libc++_shared.so`；需要：
+**本机已编译出 unsigned HAP（122.27 MB，仅差 DevEco 自动签名）。** 仓库不提交 `libnode.so` / `libc++_shared.so`；构建者需要：
 
 1. 用 OpenHarmony NDK 把 Node 24 构建成 arm64 `--shared` 库，确认 `ET_DYN` 且导出 `_ZN4node5StartEiPPc`。
 2. 把 `libnode.so`、`libc++_shared.so` 放进 `harmony-app/entry/libs/arm64-v8a/`。
-3. 在 DevEco Studio 5.x（API 12+）中打开 `harmony-app`，配置签名后执行 `hvigorw assembleHap`。
+3. 在 DevEco Studio 26（API 26）中打开 `harmony-app`，配置自动签名后运行 `harmony-app\build-hap.cmd`（内部调用 hvigorw assembleHap）。
 
 也可使用 `.github/workflows/harmony-build.yml` 的 self-hosted `harmonyos` runner。详细步骤与限制见 [harmony-app/README.md](harmony-app/README.md)。
 

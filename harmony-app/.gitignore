@@ -8,3 +8,4 @@ entry/libs/arm64-v8a/*.so
 *.hap
 *.app
 local.properties
+entry/.cxx/

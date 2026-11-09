@@ -13,7 +13,7 @@ struct Index {
   aboutToAppear(): void {
     const context = getContext(this) as common.UIAbilityContext;
     const root = context.filesDir + '/engine';
-    const started = entry.startNode(root, 3080);
+    const started: boolean = entry.startNode(root, 3080);
     if (!started) {
       this.message = 'libnode.so 或 node::Start 不可用，请先按 README 放置 arm64 库。';
       return;

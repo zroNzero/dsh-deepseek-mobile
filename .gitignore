@@ -24,8 +24,12 @@ refer/harness-official/
 runtime.zip
 alias-links.txt
 *.apk
+*.hap
+*.app
 .cache/
 build/
 node_modules/
+oh_modules/
+.hvigor/
 local.properties
 harmony-app/entry/libs/arm64-v8a/*.so

@@ -2,7 +2,7 @@
 
 这是 Android 版的 HarmonyOS 原生壳工程：用 `libnode.so` 在 **App 进程内**启动 DSH Node Host，再用 `Web` 组件加载 `http://127.0.0.1:3080`，并注入与 Android 完全相同的 `inject.js` / `inject.css`。
 
-> 当前仓库**不包含** `libnode.so`，本机也没有 DevEco Studio / HarmonyOS SDK，因此没有在本机产出 HAP。工程结构、NAPI、ArkTS 与 CI 工作流均已就位；按下面步骤补齐 SDK 和库后可编译。
+> 仓库**不提交** `libnode.so` / `libc++_shared.so`（体积与许可证原因），但本机已放入 `entry/libs/arm64-v8a/` 并实际编译通过：DevEco Studio 26.0.0 + API 26 + hvigor 6.26.9，产出 **unsigned HAP 122.27 MB**，内含 `libs/arm64-v8a/libnode.so`、`libc++_shared.so`、`libentry.so`。目前只差 DevEco 自动签名。
 
 ## 为什么走进程内 `dlopen`
 
@@ -83,8 +83,14 @@ HAP 不内置 331MB 的 `runtime.zip`。首次安装后，把 Android 版 `runti
 
 ### 3. 构建 HAP
 
-```bash
+```bat
 cd harmony-app
+build-hap.cmd
+```
+
+`build-hap.cmd` 会设置 `DEVECO_SDK_HOME`、`NODE_HOME`、`JAVA_HOME` 与 `PATH`，首次自动执行 `ohpm install`，然后调用 DevEco 的 `hvigorw assembleHap`。也可以手动运行：
+
+```bat
 ohpm install
 hvigorw assembleHap --mode module -p product=default -p buildMode=debug
 ```
@@ -97,6 +103,6 @@ hvigorw assembleHap --mode module -p product=default -p buildMode=debug
 
 ## 当前限制
 
-- 本机没有 DevEco/SDK，**未实际编译 HAP**，因此 `dlopen` 是否在目标鸿蒙设备上稳定运行尚未经过真机验证。
+- 本机已实际编译出 unsigned HAP（122.27 MB），`dlopen` 在目标鸿蒙设备上的运行结果尚未验证；签名后需真机确认。
 - 若 `dlopen` 成功但 `node::Start` 内部仍调用被 seccomp 拦截的 syscall，SIGSYS 处理器只能记录日志；需要继续裁掉对应能力（例如 `UV_USE_IO_URING=0` 已覆盖 io_uring）。
 - on-device 工具调用（shell/终端）依赖 `fork`；进程内 Node 只能保证 Web UI 与主 Host 启动，子进程工具在纯 seccomp 容器里仍不可用。
