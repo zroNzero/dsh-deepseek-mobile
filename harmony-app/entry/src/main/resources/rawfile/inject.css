@@ -17,8 +17,8 @@
   /* Floating capsule: 28px radius, elevated dark surface, safe-area inset. */
   [data-composer-card] {
     border-radius: 28px !important;
-    background: var(--dsw-alias-bg-elevated, #1b1b1f) !important;
-    border: 1px solid var(--dsw-alias-border-subtle, rgba(255, 255, 255, 0.08)) !important;
+    background: var(--dsw-alias-bg-layer-1, #fff) !important;
+    border: 1px solid var(--dsw-alias-border-l2, rgba(127, 127, 127, 0.18)) !important;
     box-shadow:
       0 10px 30px rgba(0, 0, 0, 0.45),
       0 2px 8px rgba(0, 0, 0, 0.28) !important;
@@ -59,4 +59,44 @@
   [data-sidebar-drawer] .sidebarCol {
     z-index: 71 !important;
   }
+}
+
+/* Cloud GitHub / ArkWeb fixes */
+body[data-ds-dark-theme] textarea,
+body[data-ds-dark-theme] input,
+body[data-ds-dark-theme] [contenteditable='true'] {
+  color: #f5f5f5 !important;
+  caret-color: #f5f5f5 !important;
+  -webkit-text-fill-color: #f5f5f5 !important;
+}
+
+body:not([data-ds-dark-theme]) textarea,
+body:not([data-ds-dark-theme]) input,
+body:not([data-ds-dark-theme]) [contenteditable='true'] {
+  color: #111111 !important;
+  caret-color: #111111 !important;
+  -webkit-text-fill-color: #111111 !important;
+}
+
+/* The light theme previously inherited a hard-coded dark composer fallback. */
+body:not([data-ds-dark-theme]) [data-composer-card] {
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.10),
+    0 2px 8px rgba(0, 0, 0, 0.06) !important;
+}
+
+/* The login/consent surface uses a native <dialog>; keep the dialog but drop
+   the full-screen dim veil that otherwise stays over the app. */
+dialog::backdrop {
+  background: transparent !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+html::before,
+html::after,
+body::before,
+body::after {
+  content: none !important;
+  display: none !important;
 }

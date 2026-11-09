@@ -33,3 +33,13 @@ oh_modules/
 .hvigor/
 local.properties
 harmony-app/entry/libs/arm64-v8a/*.so
+# ---- HarmonyOS 构建输入/产物 ----
+harmony-app/entry/build/
+harmony-app/.hvigor/
+harmony-app/oh_modules/
+harmony-app/.idea/
+harmony-app/.clangd
+harmony-app/.clang-tidy
+harmony-app/debug/
+harmony-app/entry/src/main/resources/rawfile/runtime-js.tar.gz
+.dsh-favorites/
