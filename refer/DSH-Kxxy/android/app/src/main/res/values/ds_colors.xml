@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- DeepSeek 深色图标底色与启动页纯黑背景 -->
+    <color name="ds_icon_bg">#0A0A0A</color>
+</resources>

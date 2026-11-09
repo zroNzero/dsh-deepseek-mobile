@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+      宿主窗口与引导页配色（浅色）。
+
+      与 values-night/colors.xml 成对。这些值原先硬编码在 MainActivity /
+      BootstrapActivity 的 Kotlin 里（清一色深色），导致「跟随系统」修好之后
+      浅色主题下仍会在 WebView 首次绘制前闪一块深色、引导页也仍是深色。
+
+      深色那一侧的值与原硬编码值逐字节相同，所以夜间模式下的观感没有变化。
+    -->
+    <color name="kxxy_window_bg">#0A0A0A</color>
+    <color name="kxxy_boot_title">#FFFFFF</color>
+    <color name="kxxy_boot_status">#9AA3B2</color>
+    <color name="kxxy_boot_hint">#6B7280</color>
+
+    <!-- 崩溃自愈（方案 K）的强调色与状态色 -->
+    <color name="kxxy_accent">#4D6BFE</color>
+    <color name="kxxy_accent_text">#FFFFFF</color>
+    <color name="kxxy_danger">#C0392B</color>
+    <color name="kxxy_ok">#1E8E5A</color>
+    <color name="kxxy_warn">#B26B00</color>
+    <color name="kxxy_card_bg">#15171C</color>
+    <color name="kxxy_divider">#262A33</color>
+</resources>

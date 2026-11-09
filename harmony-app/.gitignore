@@ -1,0 +1,10 @@
+# HarmonyOS build outputs and local SDK state
+oh_modules/
+build/
+.hvigor/
+entry/build/
+entry/.preview/
+entry/libs/arm64-v8a/*.so
+*.hap
+*.app
+local.properties

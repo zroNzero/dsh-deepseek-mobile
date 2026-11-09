@@ -1,0 +1,31 @@
+# ---- 本机下载的构建工具链（体积大、可重装，不入库）----
+android-sdk/
+tools/jdk-17/
+tools/gradle-8.10.2/
+tools/*.zip
+tools/*.zip.part
+tools/*.curl.err
+
+# ---- 构建/装配临时目录 ----
+_logs/
+_salvage/
+_wrapper_tmp/
+_inspect_*.txt
+
+# ---- Android 构建产物（refer 内另有 .gitignore，这里兜底）----
+refer/DSH-Kxxy/android/.gradle/
+refer/DSH-Kxxy/android/build/
+refer/DSH-Kxxy/android/app/build/
+
+# ---- 参考克隆与最终产物（不随大仓同步）----
+refer/harness-official/
+*.apk
+# ---- 独立仓库：所有构建产物与巨型依赖 ----
+runtime.zip
+alias-links.txt
+*.apk
+.cache/
+build/
+node_modules/
+local.properties
+harmony-app/entry/libs/arm64-v8a/*.so

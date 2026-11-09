@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">DeepSeek Harness</string>
+
+    <!-- 引擎状态通知 -->
+    <string name="notif_channel">引擎状态</string>
+    <string name="notif_channel_engine_desc">常驻通知，显示引擎当前状态。可以退出引擎。</string>
+    <string name="notif_title">DeepSeek Harness 引擎</string>
+    <string name="notif_action_exit">退出</string>
+
+    <!-- 通知体系（方案 B）：四条渠道 -->
+    <string name="notif_channel_attention">需要你确认</string>
+    <string name="notif_channel_attention_desc">权限请求、提问与中断。优先级最高，会横幅提醒。</string>
+    <string name="notif_channel_task">任务进度</string>
+    <string name="notif_channel_task_desc">长任务的进度与完成提示。</string>
+    <string name="notif_channel_ext">扩展安装</string>
+    <string name="notif_channel_ext_desc">扩展的安装与更新，静默提示。</string>
+
+    <!-- 锁屏上只显示这一行，不含会话内容 -->
+    <string name="notif_attention_locked">DeepSeek Harness</string>
+    <string name="notif_attention_locked_hint">有新的请求等你处理</string>
+    <string name="notif_attention_group">待处理请求</string>
+
+    <!-- 权限类请求没带按钮时的兜底按钮 -->
+    <string name="notif_action_allow">允许</string>
+    <string name="notif_action_deny">拒绝</string>
+
+    <!-- 体检页：通知状态 -->
+    <string name="notif_status_ok">通知正常</string>
+    <string name="notif_status_off">通知已关闭</string>
+    <string name="notif_status_attention_off">「需要你确认」渠道已被关闭</string>
+    <string name="notif_status_open_settings">去设置</string>
+
+    <string name="status_idle">空闲</string>
+    <string name="status_installing">正在安装运行时 %1$d%%</string>
+    <string name="status_starting">正在启动引擎…</string>
+    <string name="status_healthy">引擎已就绪</string>
+    <string name="status_backoff">启动失败，%1$d 秒后重试（第 %2$d 次）</string>
+    <string name="status_exiting">正在退出…</string>
+
+    <!-- 引导页 -->
+    <string name="boot_title">DeepSeek Harness</string>
+    <string name="boot_checking">正在检查运行环境…</string>
+    <string name="boot_installing">正在安装运行时…</string>
+    <string name="boot_starting">正在启动引擎…</string>
+    <string name="boot_waiting">正在等待引擎就绪…</string>
+    <string name="boot_failed">启动失败</string>
+    <string name="boot_retry">重试</string>
+    <string name="boot_webview_too_old">系统 WebView 版本过低（需 Chrome 85 以上），请更新「Android System WebView」后重试。</string>
+    <string name="boot_hint">首次启动需要解压约 330 MB 运行时，请保持屏幕常亮。</string>
+
+    <!-- 崩溃自愈（方案 K） -->
+    <string name="boot_repair">修复启动</string>
+    <string name="boot_diagnose">诊断</string>
+    <string name="boot_diagnosing">正在定位原因…</string>
+    <string name="boot_diagnose_failed">无法完成诊断（诊断命令本身执行失败）</string>
+    <string name="boot_repairing">正在修复…</string>
+    <string name="boot_repair_done">修复完成，正在重新启动引擎…</string>
+    <string name="boot_repair_nothing">没有可修复的内容，问题不在启动配置上。</string>
+    <string name="boot_repair_failed">修复失败：%1$s</string>
+    <string name="boot_recovered">已修复，引擎恢复正常</string>
+    <string name="boot_enter">进入主界面</string>
+    <string name="boot_recovered_hint">修复只改启动配置，会话、工作区与插件包都还在。个人设置（主题、模型服务等）被移走的部分可以用「撤销上次修复」原样搬回。</string>
+    <string name="boot_failed_hint">可以先用「诊断」查看具体是哪一层配置坏了；「修复启动」会备份后移走坏配置，不删除插件与数据。</string>
+    <string name="diag_title">启动诊断</string>
+    <string name="diag_close">关闭</string>
+    <string name="diag_l1">软恢复（L1）</string>
+    <string name="diag_l2">隔离第三方插件（L2）</string>
+    <string name="diag_l3">重建依赖（L3）</string>
+    <string name="diag_undo">撤销上次修复</string>
+    <string name="diag_l3_confirm">L3 会移除 profile 的 node_modules 并需要联网重新拉取依赖。插件包已备份，可撤销。继续？</string>
+    <string name="diag_l3_offline">L3 需要联网，当前网络不可用。</string>
+    <string name="diag_undo_done">已撤销，正在重新启动引擎…</string>
+    <string name="diag_undo_none">没有可撤销的修复记录。</string>
+    <string name="diag_last_repair">上次修复：%1$s</string>
+    <string name="diag_verdict_hit">命中</string>
+    <string name="diag_verdict_miss">正常</string>
+    <string name="diag_verdict_unknown">未执行</string>
+
+    <!-- 主界面 -->
+    <string name="main_loading">正在加载界面…</string>
+    <string name="main_error">界面加载失败，请重启引擎后重试。</string>
+
+    <!-- 下载通知 -->
+    <string name="download_notification_description">正在下载到 Download/kxxy/</string>
+</resources>

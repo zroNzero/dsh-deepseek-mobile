@@ -1,0 +1,7 @@
+This directory must contain, for arm64-v8a:
+
+  libnode.so        Node.js 24.x built as a shared library for OpenHarmony/HarmonyOS
+  libc++_shared.so  from the same HarmonyOS NDK toolchain
+
+The repository does not ship these binaries. See ../README.md for how to build
+Node with --shared and for the required OpenHarmony SDK/NDK.

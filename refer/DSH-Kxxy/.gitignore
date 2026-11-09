@@ -1,0 +1,75 @@
+# DSH Kxxy — 忽略规则
+
+# ---- Android 构建产物 ----
+.gradle/
+build/
+local.properties
+*.iml
+.idea/
+.DS_Store
+captures/
+.externalNativeBuild/
+.cxx/
+# Gradle/JVM 崩溃日志：本机内存只有 7.8 GB，构建期 OOM 时会落在 android/ 下，
+# 内容是堆栈快照而非源码，不入库
+hs_err_pid*.log
+replay_pid*.log
+
+# ⚠️ 下面几条**不要**照着常见 Android 模板往这里加 —— 加了会直接毁掉升级链路：
+#
+#     *.jks
+#     *.keystore
+#     android/keystore/
+#     keystore.properties
+#
+# `android/keystore/` 是**故意入库**的：它是 DSH Kxxy 的固定签名密钥。
+# 一旦不入库，换机器 / 重新 clone 就只剩两条路 —— 用本机自动生成的
+# debug.keystore（就是缺陷 DX），或者找不到密钥直接构建失败。前者会让所有
+# 已装设备报 INSTALL_FAILED_UPDATE_INCOMPATIBLE，只能卸载（连引擎与 713 MiB
+# 运行时一起清掉）。取舍与风险见 android/keystore/README.md。
+
+# ---- Python 字节码（tools/lib/poolextract.py 等被 fetch-extensions.mjs 调用时生成）----
+__pycache__/
+*.pyc
+
+# ---- 运行时装配产物 ----
+# runtime.zip 是 tools/build-runtime.mjs 的产物（④ 全能精选档 591 MiB / 42042 条目，
+# 含 LibreOffice wasm 引擎、CJK 字体、中文语言包与 TeX Live 宏包树），
+# 由本机 DSH 桌面版的 app.asar + Termux .deb + CTAN 装配而成，不属于源码。
+# 需要它的人请按 README「三、构建」自行生成。
+android/app/src/main/assets/runtime.zip
+
+# 别名清单（tools/build-runtime.mjs 的产物，与 runtime.zip 同源同次生成）：
+# 1,709 条 `路径 → 本体` 的对照表，119 KiB。它和 runtime.zip 必须**成对**使用
+# （RuntimeInstaller 解完 zip 后按它建软链），单独提交任何一半都没有意义，
+# 所以同样不入库。缺了它 zip 里的 LINK 条目会被跳过，别名的可执行文件全部缺失。
+android/app/src/main/assets/alias-links.txt
+
+# 构建清单（tools/build-runtime.mjs 每次构建重写，进 assets 是给 gradle 当输入读，
+# 不是源码）：内含 runtimeSha256 / 插件指纹 / 构建时刻 / 仓库地址。
+# 不入库的理由有两条：① 每次构建都变，提交它等于每包一次无意义 diff；
+# ② 缺它是**受支持的降级路径** —— gradle 的 metaString 会返回 unknown，
+# 探针据此放行、关于页把指纹行收起，但编译与安装都正常。
+android/app/src/main/assets/meta/
+
+# 扩展包池（tools/fetch-extensions.mjs 产物，约 1.0 GiB / 20 项），与 runtime.zip
+# 同理是构建产物；目录清单随包生成于 plugins/kxxy-host/extensions.json。
+android/app/src/main/assets/ext-pool/
+plugins/kxxy-host/extensions.json
+
+# 官方主题 token（构建期抽取产物，见 tools/build-runtime.mjs extractOfficialTheme）
+plugins/kxxy-host/web/theme.css
+
+# ---- 装配中间缓存 ----
+# .cache/debs（下载的 .deb）与 .cache/stage（解包后的 Termux 前缀树），
+# 可由 tools/fetch-runtime.mjs 重新拉取，体积约 226 MiB。
+.cache/
+
+# ---- 开发期临时脚本与探针 ----
+# tools/ 下的 _dev_*.sh / _probe_*.mjs / _build_*.log 等是真机排障时随手写的一次性
+# 脚本，不是构建链路的一部分（构建只用 build-runtime.mjs / build-apk.ps1 /
+# build-go-android.ps1 / inject-apk-assets.mjs 这几个固定入口）。
+# 保留在本地便于回溯，但不入库：265 个文件里绝大多数只在某一次复现里有意义。
+tools/_*
+# versionCode 落盘下限（本机状态，随构建机变化，不入库）
+android/.kxxy-version-code-floor

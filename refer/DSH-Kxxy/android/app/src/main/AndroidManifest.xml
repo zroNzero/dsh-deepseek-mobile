@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  DSH Kxxy — Android 清单
+  方案 T：Web-First 宿主。UI 全部由 WebView 承载（官方 React 前端 + 自研宿主管理页），
+  原生只保留引擎监管、前台服务、PTY、权限桥所必需的声明。
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <!-- 缺陷 DC：`RuntimeInstaller.ensureResolvConf` 从 ConnectivityManager
+         读当前活动网络的 DNS 服务器，用来生成 `<root>/etc/resolv.conf`。
+         缺这条权限时 `cm.activeNetwork` 直接抛 SecurityException：
+           `ConnectivityService: Neither user NNNNN nor current process has
+            android.permission.ACCESS_NETWORK_STATE.`
+         于是 ensureResolvConf 每次都在第一行放弃、永远写不出文件 ——
+         而 Go 的纯 Go resolver 是**唯一**读这个文件的组件（bionic 的
+         getaddrinfo 走 netd，Node/curl/git/python 都不受影响），所以症状
+         只表现为 `go get` 报 `lookup goproxy.cn on [::1]:53: connection refused`。
+         这是普通（normal）权限，安装即授予，不弹窗、无需运行时请求。 -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <!-- Android 14+ 要求前台服务声明类型。specialUse 不被系统限时强杀；
+         对照：dataSync 类型有 6 小时上限，长任务会被中断。 -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <!-- Android 13+ 通知为运行时权限；引擎状态通知需要 -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <!-- 外置工作区读写（sessions/workspaces 外置到公开目录，卸载不丢） -->
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
+    <!-- ===== 媒体与文件（对照系统权限页的「照片和视频」「音乐和音频」）=====
+         targetSdk 固定 28，因此 Android 13+ 也走 legacy 的 READ_EXTERNAL_STORAGE：
+         系统会在权限页上把它拆成「照片和视频」「音乐和音频」两行，行为与用户
+         预期一致。刻意不声明 READ_MEDIA_IMAGES / READ_MEDIA_AUDIO —— 那是
+         targetSdk 33+ 的通道，在 28 上申请会立刻 DENIED，并计入「拒绝两次
+         不再询问」，反而把权限做死。 -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <!-- ===== 短信（对照系统权限页的「短信 / 发送彩信」）=====
+         三条成组：只发不收会让验证码类流程断在半路，只读不发又做不了回复。
+         这是 dangerous 权限，由设置页「系统权限」卡片或首次使用时请求。 -->
+    <uses-permission android:name="android.permission.SEND_SMS" />
+    <uses-permission android:name="android.permission.RECEIVE_SMS" />
+    <uses-permission android:name="android.permission.READ_SMS" />
+    <!-- ===== 其他权限（对照系统权限页的「其他权限」列表）=====
+         · 显示悬浮窗 → SYSTEM_ALERT_WINDOW（特殊权限，只能跳设置页开）
+         · 后台弹出界面 → 由悬浮窗/后台启动策略间接影响，无原生权限，见 miui_perms
+         · 获取应用列表 → QUERY_ALL_PACKAGES（normal，安装即授予）
+         · 媒体音量控制 → MODIFY_AUDIO_SETTINGS（见上文）
+         · 桌面快捷方式 → launcher 的 INSTALL_SHORTCUT（normal）
+         · 获取设备动作与方向 → HIGH_SAMPLING_RATE_SENSORS（normal；
+           低采样率本身不需要权限，MIUI 的单列开关在安全中心）
+         · 锁屏显示 / 链式启动 / 动态壁纸服务 → 没有对应原生权限，
+           只能由厂商安全中心管（设置页卡片提供跳转） -->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
+    <uses-permission android:name="android.permission.HIGH_SAMPLING_RATE_SENSORS" />
+    <uses-permission android:name="com.android.launcher.permission.INSTALL_SHORTCUT" />
+
+    <!-- 导出日志写 Download/kxxy/（五项改进方案 §7-3 方案 B）。
+         targetSdk 28 走 legacy storage：Android 9 及以下安装即授，
+         Android 10 需运行时授权（未授时导出自动退回应用私有目录，不报错）。 -->
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="29" />
+    <!-- ===== 媒体能力：相机 / 麦克风 =====
+         用户原话：「录音、相机，它是个应用，应该要获取全部权限」。此前清单里
+         **一条媒体权限都没有**，于是两件事同时坏掉：
+           ① 设置页「系统权限」卡片无行可显示 —— 因为原生快照压根没有这两项；
+           ② WebView 里的 getUserMedia / <input capture> 直接失败，因为
+              Chromium 在 onPermissionRequest 之前就要看清单里有没有声明。
+         这三条都是运行时（dangerous）权限，由设置页卡片或首次使用时请求，
+         具体入口见 MainActivity.handlePermissionBridge 的 camera/microphone/media/all。 -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <!-- normal 权限，安装即授予。WebView 的音频采集路径（AAudio/OpenSL）在
+         grant 之后仍会检查它，缺了表现为「网页拿到了音轨但一直是静音」——
+         现象很像麦克风坏了，实际是这一行。 -->
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+
+    <!-- required=false：没有摄像头/麦克风的设备（部分平板、模拟器）照样能装，
+         权限卡会把对应行标成「无硬件」而不是永远显示未授权。
+         不写 uses-feature 时系统会按「需要摄像头」处理，Google Play 会被过滤；
+         本应用走 sideload 不受影响，但保持声明正确没有坏处。 -->
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
+    <uses-feature android:name="android.hardware.microphone" android:required="false" />
+
+    <!-- 设置页「系统权限」卡片请求电池优化白名单（kxxy://perm/request?name=battery） -->
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+    <!-- 缺陷 DG：在应用内「点开」自己构建的 APK（交付文件卡片 / 终端里 apk 路径）
+         必须唤起系统安装器。Android 8.0+ 的「安装未知来源应用」是**按应用授权**的
+         特殊权限：没有这条声明，PackageInstaller 连选择框都不会出现，用户看到的是
+         「点了没反应」；有它之后系统仍会弹「是否允许来自此来源」，由用户决定。
+         这是普通声明（安装即登记），运行时开关在「安装未知应用」设置页。 -->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+
+    <!-- ===== Termux:API 原生桥（缺陷 BE）所需的权限 =====
+         这些都是普通（normal）权限，安装即授予，不弹窗、无需运行时请求。
+         缺了它们，对应方法会在应用进程里抛 SecurityException 而不是静默 rc=0；
+         `TermuxApiServer` 会把异常原样转成 JSON error + 非零退出码，
+         所以即便某个权限被 OEM 收回，用户也能看到明确原因。 -->
+    <!-- termux-vibrate：真机实测缺它报
+         `SecurityException: vibrate: Neither user NNNNN nor current process has android.permission.VIBRATE` -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <!-- termux-wifi-connectioninfo：缺它报
+         `WifiService: Neither user NNNNN nor current process has android.permission.ACCESS_WIFI_STATE` -->
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+
+    <application
+        android:name=".KxxyApp"
+        android:label="@string/app_name"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher"
+        android:theme="@style/Theme.Kxxy"
+        android:allowBackup="false"
+        android:usesCleartextTraffic="true"
+        android:hardwareAccelerated="true">
+
+        <!-- 引导页：引擎未就绪时的唯一原生界面（WebView 无处加载） -->
+        <activity
+            android:name=".BootstrapActivity"
+            android:exported="true"
+            android:launchMode="singleTask"
+            android:configChanges="orientation|screenSize|keyboardHidden">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- 主界面：纯 WebView 容器，加载 127.0.0.1:3080 -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="false"
+            android:launchMode="singleTask"
+            android:configChanges="orientation|screenSize|keyboardHidden" />
+
+        <!-- 引擎前台服务：保活第一层 -->
+        <service
+            android:name=".service.EngineService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="local_ai_agent_engine" />
+        </service>
+
+        <!--
+          Shizuku binder 接收通道。
+
+          三条属性都是 ShizukuProvider 的硬性要求（照抄官方模板，改动会静默失联）：
+          - android:permission 必须是一个「授给 Shell(com.android.shell) 但不给普通
+            应用」的权限。INTERACT_ACROSS_USERS_FULL 满足：只有系统与 adb shell 持有，
+            于是该 provider 只对「本应用自身」和「Shizuku server（以 adb/root 身份运行）」
+            开放。换成普通权限会让任何应用都能来取 binder。
+          - android:exported 必须 true —— Shizuku server 以 adb 身份跨进程访问。
+          - android:multiprocess 必须 false —— Shizuku server 只在应用启动时取一次 uid，
+            多进程会让 uid 判定错乱。
+        -->
+        <provider
+            android:name="rikka.shizuku.ShizukuProvider"
+            android:authorities="${applicationId}.shizuku"
+            android:exported="true"
+            android:multiprocess="false"
+            android:permission="android.permission.INTERACT_ACROSS_USERS_FULL" />
+
+        <!--
+          文件分享用的只读 ContentProvider（缺陷 BE）。
+
+          为什么必须有：termux-share <file> 要把文件交给别的应用，而从
+          targetSdk>=24 起把 file:// 放进 Intent 会抛 FileUriExposedException
+          直接崩溃。工程没引 androidx，用不了官方 FileProvider，所以这里用
+          自写的等价实现（见 KxxyFilesProvider）。
+
+          三条属性缺一不可：
+          - exported="false"：别的应用不能主动查询本 provider，只能拿本应用
+            随 Intent 授出的单个 URI 的临时权限；
+          - grantUriPermissions="true"：允许签发临时读授权，否则接收方打不开；
+          - authorities 必须与 KxxyFilesProvider.AUTHORITY 逐字一致。
+        -->
+        <provider
+            android:name=".engine.KxxyFilesProvider"
+            android:authorities="app.kxxy.files"
+            android:exported="false"
+            android:grantUriPermissions="true" />
+
+        <!--
+          通知按钮的回执接收器（方案 B3）。
+
+          为什么是广播而不是 service：Android 12 起禁止从后台启动前台服务，
+          通知按钮的 PendingIntent 若用 getService 会抛
+          ForegroundServiceStartNotAllowedException —— 而且这个异常发生在系统
+          进程里，应用侧连崩溃日志都看不到，只表现为「点了没反应」。
+
+          exported="false"：只有本应用自己发出的 PendingIntent 能触发它。
+        -->
+        <receiver
+            android:name=".service.AttentionReceiver"
+            android:exported="false" />
+
+    </application>
+</manifest>

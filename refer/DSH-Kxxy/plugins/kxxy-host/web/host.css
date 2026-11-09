@@ -1,0 +1,2901 @@
+/* ==========================================================================
+   DSH Kxxy Host Dashboard - Visual System
+   Design Tokens & Official Visual Homology
+   ========================================================================== */
+
+/* ⚠️ 语义映射必须挂在 **body** 上，不能挂 :root：
+   theme.css 的官方 token（--dsw-*）定义在 body（浅色）与 body[data-ds-dark-theme]
+   （暗色）上；CSS 变量在「声明处」解析——若把映射放在 :root（html），解析时
+   找不到 body 上的 --dsw-*，会全部落到暗色兜底值，浅色切换就只有用了
+   body 层变量的顶栏/底栏跟随（真机踩过）。 */
+body {
+  /* 官方设计 Token 映射（theme.css 提供定义，构建期从 dsh-client-ui-theme 抽取）。
+     管理页与对话界面同源：官方调色重跑构建即自动跟齐。
+     var() 的第二参是 theme.css 缺失时的兜底。 */
+  --bg-base: var(--dsw-alias-bg-base, #151517);
+  --bg-sidebar: var(--dsw-alias-bg-base, #151517);
+  --bg-card: var(--dsw-alias-bg-layer-1, #1b1b1c);
+  --bg-elevated: var(--dsw-alias-bg-layer-2, #232324);
+  --bg-hover: var(--dsw-alias-interactive-bg-hover, #ffffff0f);
+  --border-subtle: var(--dsw-alias-border-l1, #ffffff0f);
+  --border-strong: var(--dsw-alias-border-l2, #ffffff1f);
+  --text-primary: var(--dsw-alias-label-primary, #f9fafb);
+  --text-secondary: var(--dsw-alias-label-secondary, #cfd3d6);
+  --text-muted: var(--dsw-alias-label-tertiary, #81858c);
+  --accent-blue: var(--dsw-static-deepseek-500, #4176e6);
+  --accent-blue-hover: var(--dsw-static-deepseek-450, #5686fe);
+  --accent-green: var(--dsw-static-green-500, #22c55e);
+  --accent-orange: var(--dsw-static-amber-500, #f59e0b);
+  --accent-purple: var(--dsw-static-blue-500, #3b82f6);
+  --accent-red: var(--dsw-static-red-500, #ef4444);
+  --accent-cyan: var(--dsw-static-deepseek-400, #7aaaff);
+
+  /* 顶栏/底栏的半透明底（跟随主题；老 WebView 不支持 color-mix，给两套字面量） */
+  --bg-overlay: rgba(249, 250, 251, 0.86);
+}
+body[data-ds-dark-theme] {
+  --bg-overlay: rgba(21, 21, 23, 0.88);
+}
+
+:root {
+  /* 尺寸与布局变量 */
+  --header-height: 56px;
+  --tabbar-height: 58px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-pill: 9999px;
+
+  /* 字体栈 */
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  --font-mono: "SF Mono", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+
+  /* 触控安全与过渡 */
+  --touch-min: 44px;
+  --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 盒模型与重置 */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* 限制移动视口宽度并在桌面居中 */
+.app-shell {
+  width: 100%;
+  max-width: 480px;
+  min-height: 100vh;
+  margin: 0 auto;
+  background-color: var(--bg-base);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 0 32px rgba(0, 0, 0, 0.25);
+}
+
+/* 顶部固定 Header */
+.app-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: calc(var(--header-height) + env(safe-area-inset-top, 0px));
+  padding-top: env(safe-area-inset-top, 0px);
+  z-index: 100;
+  background-color: var(--bg-overlay);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.header-inner {
+  width: 100%;
+  max-width: 480px;
+  height: var(--header-height);
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.header-branding {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  filter: drop-shadow(0 0 8px rgba(0, 192, 255, 0.35));
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.header-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: -0.2px;
+  line-height: 1.2;
+}
+
+.header-version {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
+
+.header-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 回到官方对话界面。触控目标按 36px 给（顶部条高度有限，
+   靠 padding 把可点区域撑到 ≥ 36×36，配合 .app-header 的整条高度足够） */
+.header-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  min-height: 36px;
+  padding: 0 10px 0 6px;
+  border-radius: var(--radius-pill);
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  font-size: 12px;
+  text-decoration: none;
+  transition: background-color .15s, color .15s;
+}
+
+.header-back:active {
+  background-color: var(--bg-hover, rgba(255, 255, 255, .08));
+  color: var(--text-primary);
+}
+
+.header-back svg {
+  flex: none;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.status-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+/* 主内容视口 */
+.app-main {
+  flex: 1;
+  width: 100%;
+  padding-top: calc(var(--header-height) + env(safe-area-inset-top, 0px) + 12px);
+  padding-bottom: calc(var(--tabbar-height) + env(safe-area-inset-bottom, 0px) + 16px);
+  padding-left: 14px;
+  padding-right: 14px;
+}
+
+/* 纯 CSS Tab View 显隐控制 */
+.view-pane {
+  display: none;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.view-pane.active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(3px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* 通用卡片拟态 */
+.card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  margin-bottom: 12px;
+  position: relative;
+  overflow: hidden;
+}
+
+.card:last-child {
+  margin-bottom: 0;
+}
+
+.block-card {
+  background-color: var(--bg-card);
+}
+
+.card-title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.card-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 12px;
+}
+
+.card-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.card-subtitle {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+/* 呼吸圆点与状态动画 */
+.pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  position: relative;
+}
+
+.pulse-dot-large {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+  position: relative;
+}
+
+.dot-green {
+  background-color: var(--accent-green);
+  box-shadow: 0 0 8px rgba(39, 174, 96, 0.6);
+}
+
+.dot-green::after {
+  content: "";
+  position: absolute;
+  top: -3px;
+  left: -3px;
+  right: -3px;
+  bottom: -3px;
+  border-radius: 50%;
+  border: 2px solid rgba(39, 174, 96, 0.4);
+  animation: pulseBreath 2.2s infinite ease-in-out;
+}
+
+.dot-orange {
+  background-color: var(--accent-orange);
+  box-shadow: 0 0 8px rgba(242, 153, 74, 0.6);
+}
+
+.dot-orange::after {
+  content: "";
+  position: absolute;
+  top: -3px;
+  left: -3px;
+  right: -3px;
+  bottom: -3px;
+  border-radius: 50%;
+  border: 2px solid rgba(242, 153, 74, 0.4);
+  animation: pulseBreath 2.2s infinite ease-in-out;
+}
+
+.dot-red {
+  background-color: var(--accent-red);
+  box-shadow: 0 0 8px rgba(235, 87, 87, 0.6);
+}
+
+.dot-red::after {
+  content: "";
+  position: absolute;
+  top: -3px;
+  left: -3px;
+  right: -3px;
+  bottom: -3px;
+  border-radius: 50%;
+  border: 2px solid rgba(235, 87, 87, 0.4);
+  animation: pulseBreath 2.2s infinite ease-in-out;
+}
+
+@keyframes pulseBreath {
+  0% { transform: scale(0.9); opacity: 0.8; }
+  50% { transform: scale(1.6); opacity: 0; }
+  100% { transform: scale(0.9); opacity: 0; }
+}
+
+/* 概览：引擎状态主卡 */
+.hero-status-card {
+  background: var(--bg-card);
+  border-color: rgba(47, 128, 237, 0.25);
+  padding: 18px 16px;
+}
+
+.hero-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.hero-indicator {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.hero-titles {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.hero-status-text {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.3px;
+}
+
+.hero-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.hero-action-slot {
+  display: flex;
+  align-items: center;
+}
+
+/* 图标按钮 */
+.icon-button {
+  width: 36px;
+  height: 36px;
+  min-width: var(--touch-min);
+  min-height: var(--touch-min);
+  border-radius: var(--radius-pill);
+  background-color: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.icon-button:active {
+  transform: scale(0.92);
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+}
+
+/* 徽章 Badge */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 11px;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-weight: 500;
+  font-family: var(--font-mono);
+}
+
+.badge-accent {
+  background-color: rgba(47, 128, 237, 0.15);
+  color: var(--accent-blue);
+  border: 1px solid rgba(47, 128, 237, 0.3);
+}
+
+.badge-subtle {
+  background-color: rgba(255, 255, 255, 0.05);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-subtle);
+}
+
+.badge-success {
+  background-color: rgba(39, 174, 96, 0.15);
+  color: var(--accent-green);
+  border: 1px solid rgba(39, 174, 96, 0.3);
+}
+
+/* 三指标卡片网格 */
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.metric-card {
+  padding: 12px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-height: 98px;
+  justify-content: space-between;
+}
+
+.metric-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 6px;
+}
+
+.memory-icon {
+  background-color: rgba(0, 192, 255, 0.12);
+  color: var(--accent-cyan);
+}
+
+.uptime-icon {
+  background-color: rgba(39, 174, 96, 0.12);
+  color: var(--accent-green);
+}
+
+.port-icon {
+  background-color: rgba(155, 81, 224, 0.12);
+  color: var(--accent-purple);
+}
+
+.metric-label {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.metric-value-wrap {
+  display: flex;
+  align-items: baseline;
+  gap: 3px;
+  margin: 2px 0;
+}
+
+.metric-value {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  letter-spacing: -0.5px;
+}
+
+.metric-unit {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+.metric-foot {
+  font-size: 10px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+}
+
+/* 运行时完整性检查列表 */
+.check-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.check-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.check-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.check-status-icon {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: bold;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.check-status-icon.success,
+.success {
+  background-color: rgba(39, 174, 96, 0.15);
+  color: var(--accent-green);
+  border: 1px solid rgba(39, 174, 96, 0.3);
+}
+
+.check-status-icon.fail {
+  background-color: rgba(235, 87, 87, 0.15);
+  color: var(--accent-red);
+  border: 1px solid rgba(235, 87, 87, 0.3);
+}
+
+.check-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.check-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.check-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.check-badge {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  background: var(--bg-elevated);
+  padding: 1px 5px;
+  border-radius: 3px;
+}
+
+.check-detail {
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+  word-break: break-all;
+}
+
+.runtime-all-status {
+  white-space: nowrap;
+}
+
+.runtime-checks-container {
+  min-height: 40px;
+}
+
+/* 13 项补丁手风琴折叠卡片 */
+.patch-card {
+  padding: 0;
+}
+
+#patch-details-wrapper,
+.patch-details-wrapper,
+.patch-accordion {
+  width: 100%;
+}
+
+.patch-accordion summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  user-select: none;
+}
+
+.patch-accordion summary::-webkit-details-marker {
+  display: none;
+}
+
+.patch-summary-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.patch-summary-right {
+  display: flex;
+  align-items: center;
+}
+
+.accordion-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.chevron-icon {
+  color: var(--text-secondary);
+  transition: transform var(--transition-normal);
+}
+
+.patch-accordion[open] .chevron-icon {
+  transform: rotate(180deg);
+}
+
+.patch-content-body {
+  padding: 0 16px 16px 16px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.patch-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 12px;
+}
+
+.patch-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.patch-id {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--accent-cyan);
+  background-color: rgba(0, 192, 255, 0.1);
+  padding: 2px 5px;
+  border-radius: 4px;
+  border: 1px solid rgba(0, 192, 255, 0.2);
+  flex-shrink: 0;
+}
+
+.patch-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.patch-name {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.patch-desc {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* 扩展视图：内置说明卡
+   （扩展页原先是「镜像源加速」卡，但本页扩展全部来自 APK 内置包池、
+     零联网，镜像源在这里没有任何作用 —— 现已移到设置视图的「插件下载源」。） */
+.builtin-note-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  background-color: var(--bg-elevated);
+}
+
+.builtin-note-icon {
+  font-size: 20px;
+  line-height: 1.2;
+  flex-shrink: 0;
+}
+
+.builtin-note-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.builtin-note-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.builtin-note-sub {
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+/* 「关于」入口卡（设置视图）—— 点击弹出信息弹窗。
+   原「宿主环境参数」卡片与「插件下载源」卡片的位置：前者内容已移入弹窗，
+   后者按需求整体移除（镜像源的后端仍在，但控制台不再暴露入口）。 */
+.about-entry-card {
+  cursor: pointer;
+  transition: border-color .15s ease, background-color .15s ease;
+}
+
+.about-entry-card:active {
+  background-color: var(--bg-elevated);
+}
+
+.about-entry-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.about-entry-logo {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+}
+
+.about-entry-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.about-entry-text .card-title {
+  margin: 0;
+}
+
+.about-entry-chevron {
+  flex-shrink: 0;
+  color: var(--text-muted);
+}
+
+/* 关于弹窗 */
+.kxxy-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  /* 190 而不是 200：.toast-container 是 200，弹窗打开时的 toast 仍要能盖在上面 */
+  z-index: 190;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background-color: rgba(0, 0, 0, .45);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.kxxy-dialog-backdrop[data-open="false"] {
+  display: none;
+}
+
+.kxxy-dialog {
+  width: 100%;
+  max-width: 380px;
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--radius-lg);
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, .32);
+  overflow: hidden;
+}
+
+.kxxy-dialog-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.kxxy-dialog-titles {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.kxxy-dialog-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.kxxy-dialog-version {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.kxxy-dialog-close {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  background-color: transparent;
+  color: var(--text-secondary);
+}
+
+.kxxy-dialog-close:active {
+  background-color: var(--bg-elevated);
+}
+
+.kxxy-dialog-body {
+  padding: 16px;
+  overflow-y: auto;
+}
+
+.about-author {
+  display: flex;
+  align-items: center;
+  /* 三件套（作者标签 / 作者名 / 仓库链接）之后的排法：前两个贴左成一组，
+     链接用 margin-left:auto 推到右端 —— 所以这里不能再写 space-between，
+     否则三个子项会被均分到「两端 + 中间」。 */
+  justify-content: flex-start;
+  gap: 8px;
+  padding: 10px 12px;
+  margin-bottom: 14px;
+  border-radius: 10px;
+  background-color: var(--bg-elevated);
+}
+
+.about-author-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.about-author-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* 源码仓库链接：与作者同处一块，但视觉上是「次级可点目标」——
+   12px + 次级文字色 + 细边框，只在悬停/按下时抬到强调色。 */
+.about-repo-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: auto;
+  padding: 5px 9px;
+  border-radius: 8px;
+  font-size: 12px;
+  line-height: 1;
+  color: var(--text-secondary);
+  text-decoration: none;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  -webkit-tap-highlight-color: transparent;
+  transition: color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.about-repo-link svg {
+  flex: 0 0 auto;
+  opacity: 0.75;
+}
+
+.about-repo-link:hover,
+.about-repo-link:active {
+  color: var(--accent-blue);
+  border-color: rgba(65, 118, 230, 0.36);
+  background-color: rgba(65, 118, 230, 0.08);
+}
+
+.about-repo-link:hover svg,
+.about-repo-link:active svg {
+  opacity: 1;
+}
+
+/* hidden 必须显式抬起来：.about-repo-link 自己写了 display:inline-flex，
+   会盖掉 UA 对 [hidden] 的 display:none（同 .attention-host[hidden] 那条教训）。 */
+.about-repo-link[hidden] {
+  display: none;
+}
+
+.about-section-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 2px;
+}
+
+.kxxy-dialog-foot {
+  padding: 12px 16px 16px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+/* ── 关于弹窗（版本归一后重做）──────────────────────────────────────────
+   改造前这里只有一张六行表 + 一行「v0.3.2-android」，而那个版本号抄的是 DSH
+   前端页头，与 APK 毫无关系 —— 用户报障时两边对不上任何东西。现在信息分三层，
+   层次靠「视觉重量」区分，而不是靠加分隔线：
+     ① 主版本卡：大字号 versionName + versionCode 胶囊 + 提交/构建时间
+     ② 指纹卡：运行时 / 宿主插件两个内容哈希（等宽小字，一眼比对）
+     ③ 环境参数表：Target SDK / Node / 包名 …（原内容一字未改）
+
+   配色全部走 token（--bg-elevated / --border-subtle / --accent-blue），
+   深浅主题自动跟随；氛围渐变只铺在顶部 46% 且最高 12% 透明度 —— 暗色下像
+   一层极淡的辉光，亮色下不至于糊成一块蓝。 */
+.about-dialog {
+  /* 比通用 .kxxy-dialog 的 380px 略宽：指纹行要放得下 16 位等宽哈希而不折行 */
+  max-width: 404px;
+  background-image: linear-gradient(
+    180deg,
+    rgba(65, 118, 230, 0.1),
+    rgba(65, 118, 230, 0) 46%
+  );
+}
+
+.about-head {
+  padding: 18px 16px 14px;
+}
+
+/* 头部 logo 比入口卡上的大一号：弹窗里它是唯一的图形元素，太小会显得空 */
+.about-head-logo {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  border: 1px solid rgba(65, 118, 230, 0.28);
+  background-color: rgba(65, 118, 230, 0.1);
+}
+
+.about-head-titles {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.about-head-sub {
+  display: block;
+  margin-top: 3px;
+  font-size: 11px;
+  line-height: 1.3;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.kxxy-dialog-body.about-body {
+  padding: 12px 16px 4px;
+}
+
+/* ① 主版本卡 */
+.about-hero {
+  padding: 14px 16px 15px;
+  margin-bottom: 18px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  background-color: var(--bg-elevated);
+  background-image: linear-gradient(
+    135deg,
+    rgba(65, 118, 230, 0.14),
+    rgba(34, 211, 238, 0.06) 58%,
+    rgba(34, 211, 238, 0) 82%
+  );
+}
+
+.about-hero-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 7px;
+}
+
+.about-hero-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+
+.about-version-code {
+  flex: 0 0 auto;
+  padding: 3px 9px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--accent-blue);
+  background-color: rgba(65, 118, 230, 0.16);
+  border: 1px solid rgba(65, 118, 230, 0.3);
+  border-radius: 999px;
+}
+
+/* 22px 等宽大字：`0.9.2+12.3b24a6d` 这种形态用比例字体读起来会跳字 */
+.about-hero-version {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.22;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+  word-break: break-all;
+}
+
+.about-hero-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 10px;
+}
+
+.about-meta-chip {
+  padding: 2px 8px;
+  font-size: 11px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 7px;
+}
+
+.about-meta-dot {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background-color: var(--text-muted);
+  opacity: 0.5;
+}
+
+/* ② 指纹卡 */
+.about-fp-card {
+  margin-bottom: 18px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  background-color: var(--bg-elevated);
+  overflow: hidden;
+}
+
+/* 没有 build 元数据（旧 APK / 引擎未就绪）时整块收起来，而不是显示两行「—」 */
+.about-fp-card[data-empty="true"] {
+  display: none;
+}
+
+.about-fp-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+}
+
+.about-fp-row + .about-fp-row {
+  border-top: 1px solid var(--border-subtle);
+}
+
+.about-fp-label {
+  flex: 0 0 auto;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.about-fp-value {
+  font-size: 11.5px;
+  color: var(--text-primary);
+  text-align: right;
+  word-break: break-all;
+}
+
+/* ③ 分区小标题：加大字距做「标签」感，与下面卡片拉开节奏 */
+.about-body .about-section-title {
+  margin: 0 0 8px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+
+.about-info-table {
+  margin-bottom: 18px;
+}
+
+/* ④ 作者 + 底部主按钮 */
+.about-body .about-author {
+  margin-bottom: 14px;
+}
+
+.about-close-button {
+  font-weight: 600;
+}
+
+/* ── 通用确认弹窗 ───────────────────────────────────────────────────────
+   替代 WebView 原生 confirm()。原生弹窗会顶一行「网址为 http://127.0.0.1
+   的网页显示：」，既不可定制也与控制台视觉体系脱节；这里改成居中小卡：
+   图标 + 标题 + 说明 + 统计胶囊 + 双按钮，tone 决定强调色。 */
+.confirm-backdrop {
+  /* 190 → 但 z-index 要比 toast 的 200 低，理由同 .kxxy-dialog-backdrop */
+  animation: confirmBackdropIn 0.18s ease-out;
+}
+
+.confirm-dialog {
+  width: 100%;
+  max-width: 340px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  padding: 22px 20px 18px;
+  border-radius: 20px;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  box-shadow: 0 20px 56px rgba(0, 0, 0, 0.42);
+  animation: confirmPopIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  /* 让底色透出一点点主色调，tone 换色时整卡氛围跟着变 */
+  background-image: linear-gradient(180deg, rgba(65, 118, 230, 0.08), transparent 62%);
+
+  /* 强调色全部收进这两个变量：tone 只改变量，各元素自己引用。
+     不用 `#btn-confirm-ok` 这类 ID 选择器覆盖 .button-primary —— 那要靠
+     选择器权重去赢（.confirm-dialog[data-tone] #id 才压得过 .button-primary），
+     一旦按钮没有 id 或类名调整就静默失效，改样式的人根本看不出为什么。 */
+  --confirm-accent: var(--accent-blue);
+  --confirm-accent-rgb: 65, 118, 230;
+}
+
+/* 图标徽章：描边与底色都跟着 --confirm-accent 走 */
+.confirm-icon {
+  width: 48px;
+  height: 48px;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  margin-bottom: 14px;
+  color: var(--confirm-accent);
+  background-color: rgba(var(--confirm-accent-rgb), 0.12);
+  border: 1px solid rgba(var(--confirm-accent-rgb), 0.22);
+}
+
+/* 默认显示问号，warning 显示警告三角。用 display 切换而不是换 innerHTML ——
+   切图标时不用碰 JS，也不会因为一次 setAttribute 的时机问题闪一下。 */
+.confirm-icon-ask,
+.confirm-icon-warn {
+  display: block;
+}
+
+.confirm-icon-warn {
+  display: none;
+}
+
+.confirm-dialog[data-tone="warning"] .confirm-icon-ask {
+  display: none;
+}
+
+.confirm-dialog[data-tone="warning"] .confirm-icon-warn {
+  display: block;
+}
+
+.confirm-title {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.35;
+  text-align: center;
+  color: var(--text-primary);
+  margin: 0 0 8px;
+}
+
+.confirm-desc {
+  font-size: 13px;
+  line-height: 1.6;
+  text-align: center;
+  color: var(--text-secondary);
+  margin: 0;
+  /* 说明可能带换行（卸载提示等），保留但不允许撑破卡片 */
+  white-space: pre-line;
+  word-break: break-word;
+}
+
+/* 统计胶囊行：把「26 个 / 约 1.2 GB」这类数字摊开，比塞进一句话里好读 */
+.confirm-stats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+/* 显式 display:flex 会盖掉 hidden 属性默认的 display:none（UA 样式优先级更低），
+   没有统计项时必须手动压掉，否则弹窗底部会留一条空白间距。 */
+.confirm-stats[hidden],
+.confirm-desc[hidden] {
+  display: none;
+}
+
+.confirm-stat {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+  padding: 6px 11px;
+  border-radius: var(--radius-pill);
+  background-color: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1;
+}
+
+.confirm-stat b {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  /* 数字等宽，多个胶囊并排时不跳字 */
+  font-variant-numeric: tabular-nums;
+}
+
+.confirm-actions {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  margin-top: 20px;
+}
+
+.confirm-btn {
+  flex: 1 1 0;
+  min-height: 44px;
+  border-radius: var(--radius-md);
+  font-size: 14px;
+}
+
+/* tone：warning（卸载 / 危险）/ default（激活 / 常规确认） */
+.confirm-dialog[data-tone="warning"] {
+  --confirm-accent: var(--accent-red);
+  --confirm-accent-rgb: 239, 68, 68;
+  background-image: linear-gradient(180deg, rgba(239, 68, 68, 0.08), transparent 62%);
+}
+
+/* 危险操作的确定按钮跟着变红：只换底色/描边，不改 .button-primary 的布局属性 */
+.confirm-dialog[data-tone="warning"] .confirm-btn-ok {
+  background-color: var(--confirm-accent);
+  border-color: var(--confirm-accent);
+  color: #FFFFFF;
+}
+
+@keyframes confirmBackdropIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes confirmPopIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* 系统开启「减少动态效果」时不做位移，只保留淡入 */
+@media (prefers-reduced-motion: reduce) {
+  .confirm-backdrop,
+  .confirm-dialog {
+    animation-duration: 0.01s;
+  }
+}
+
+/* 分类标签横排 */
+.tab-category-bar {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  margin-bottom: 12px;
+  scrollbar-width: none;
+}
+
+.tab-category-bar::-webkit-scrollbar {
+  display: none;
+}
+
+.category-chip {
+  flex-shrink: 0;
+  height: 32px;
+  padding: 0 14px;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-pill);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.category-chip:active {
+  transform: scale(0.95);
+}
+
+.category-chip.active {
+  background-color: var(--accent-blue);
+  border-color: var(--accent-blue);
+  color: #FFFFFF;
+}
+
+/* 扩展卡片 */
+.extensions-container,
+#extensions-list,
+.extensions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ext-card {
+  padding: 14px;
+  margin-bottom: 0;
+}
+
+.ext-card-inner {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.ext-icon-box {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 13px;
+  font-family: var(--font-mono);
+  flex-shrink: 0;
+}
+
+.python-color { background: rgba(47, 128, 237, 0.15); color: #3776AB; border: 1px solid rgba(55, 118, 171, 0.3); }
+.git-color { background: rgba(240, 80, 50, 0.15); color: #F05032; border: 1px solid rgba(240, 80, 50, 0.3); }
+.clang-color { background: rgba(0, 192, 255, 0.15); color: var(--accent-cyan); border: 1px solid rgba(0, 192, 255, 0.3); }
+.media-color { background: rgba(39, 174, 96, 0.15); color: var(--accent-green); border: 1px solid rgba(39, 174, 96, 0.3); }
+.rg-color { background: rgba(242, 153, 74, 0.15); color: var(--accent-orange); border: 1px solid rgba(242, 153, 74, 0.3); }
+.rust-color { background: rgba(235, 87, 87, 0.15); color: #DEA584; border: 1px solid rgba(222, 165, 132, 0.3); }
+
+/* 扩展标识类挂载 */
+.llvm-toolchain, .ffmpeg-mini, .rust-toolchain {
+  display: inline-block;
+}
+
+.ext-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.ext-header {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 3px;
+}
+
+.ext-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.ext-version {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
+
+.ext-desc {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+  margin-bottom: 8px;
+}
+
+.ext-tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.tag-item {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  background: var(--bg-elevated);
+  color: var(--text-muted);
+  padding: 1px 6px;
+  border-radius: 4px;
+  border: 1px solid var(--border-subtle);
+}
+
+.ext-action {
+  flex-shrink: 0;
+  align-self: center;
+}
+
+/* 通用按钮系统 */
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 13px;
+  line-height: 1;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  cursor: pointer;
+  background-color: var(--bg-elevated);
+  color: var(--text-primary);
+  min-height: var(--touch-min);
+  padding: 0 16px;
+  transition: all var(--transition-fast);
+  user-select: none;
+}
+
+.button:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
+.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.button-sm {
+  min-height: 32px;
+  height: 32px;
+  padding: 0 12px;
+  font-size: 12px;
+  border-radius: var(--radius-sm);
+}
+
+.button-primary {
+  background-color: var(--accent-blue);
+  color: #FFFFFF;
+  border-color: var(--accent-blue);
+}
+
+.button-primary:active:not(:disabled) {
+  background-color: #2670D2;
+}
+
+.button-subtle {
+  background-color: var(--bg-elevated);
+  color: var(--text-secondary);
+  border-color: var(--border-subtle);
+}
+
+.button-subtle:active:not(:disabled) {
+  background-color: rgba(255, 255, 255, 0.08);
+  color: var(--text-primary);
+}
+
+.button-installed {
+  background-color: rgba(39, 174, 96, 0.12);
+  color: var(--accent-green);
+  border-color: rgba(39, 174, 96, 0.25);
+}
+
+.button-warning {
+  background-color: rgba(235, 87, 87, 0.12);
+  color: var(--accent-red);
+  border-color: rgba(235, 87, 87, 0.25);
+}
+
+.button-warning:active:not(:disabled) {
+  background-color: rgba(235, 87, 87, 0.22);
+}
+
+.button-block {
+  width: 100%;
+  height: 44px;
+  min-height: var(--touch-min);
+  border-radius: var(--radius-md);
+}
+
+/* 「已内置」说明条（④ 档预装摘要） */
+.builtin-card {
+  padding: 12px 14px;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  border-color: rgba(39, 174, 96, 0.25);
+  background: linear-gradient(90deg, rgba(39, 174, 96, 0.08), var(--bg-card));
+}
+
+.builtin-card::before {
+  content: "✓ 已内置 ";
+  color: var(--accent-green);
+  font-weight: 600;
+}
+
+/* 扩展列表空态 */
+.empty-state {
+  padding: 32px 16px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-muted);
+  background-color: var(--bg-card);
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-lg);
+}
+
+/* 扩展卡附加信息行 */
+.ext-meta {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  margin-top: 6px;
+}
+
+/* 卡片右侧动作区：纵向堆叠（已激活 + 卸载） */
+.ext-action {
+  flex-shrink: 0;
+  align-self: center;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: stretch;
+}
+
+.ext-action .button {
+  width: 76px;
+}
+
+/* 扩展分组（已激活组在最前、默认折叠；其余按类目落节） */
+.ext-group {
+  margin-bottom: 14px;
+}
+
+.ext-group-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 2px 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  user-select: none;
+}
+
+/* 可折叠分组的展开指示：折叠时朝右、展开时朝下。
+   注意与 host.js 的 expandedGroups 配合 —— 展开态是 JS 记忆的，
+   这里只负责画箭头，不参与状态判定。 */
+.ext-group-title.clickable::after {
+  content: '▸';
+  font-size: 11px;
+  color: var(--text-muted);
+  transition: transform var(--transition-fast);
+}
+
+.ext-group-title.clickable.expanded::after {
+  content: '▾';
+}
+
+.ext-group-title.clickable:active {
+  color: var(--text-primary);
+}
+
+.ext-group-count {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  background: var(--bg-elevated);
+  padding: 1px 8px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-subtle);
+}
+
+.ext-group-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* 已激活组折叠：!important 压过分类过滤写入的内联 display */
+.ext-group-body.collapsed .ext-card {
+  display: none !important;
+}
+
+/* 多选勾选框（自绘，整张 label 可点） */
+.ext-select {
+  position: relative;
+  flex: none;
+  align-self: center;
+  width: 22px;
+  height: 22px;
+  cursor: pointer;
+}
+
+.ext-select input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  margin: 0;
+}
+
+.ext-checkmark {
+  position: absolute;
+  inset: 0;
+  border: 1.5px solid var(--border-strong);
+  border-radius: 6px;
+  background: var(--bg-elevated);
+  transition: all var(--transition-fast);
+}
+
+.ext-select input:checked + .ext-checkmark {
+  background: var(--accent-blue);
+  border-color: var(--accent-blue);
+}
+
+.ext-select input:checked + .ext-checkmark::after {
+  content: "✓";
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #FFFFFF;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+/* 批量操作条（吸附底栏之上，随勾选浮出） */
+.ext-batch-bar {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(var(--tabbar-height) + env(safe-area-inset-bottom, 0px) + 10px);
+  z-index: 150;
+  width: calc(100% - 28px);
+  max-width: 452px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px;
+  background-color: var(--bg-elevated);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.3);
+  animation: toastSlideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ext-batch-bar[hidden] {
+  display: none;
+}
+
+.ext-batch-count {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.ext-batch-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+/* 权限卡与等级灰化 */
+.perm-ok {
+  color: var(--accent-green);
+  font-weight: 700;
+}
+
+/*
+ * 系统权限卡片：折叠态只留一行标题。
+ *
+ * 卡片自身 padding 归零，由 summary 的 16px 撑出留白 —— 和补丁卡
+ * （`.patch-card`）同一套做法。若保留卡片 padding，summary 会缩进一层，
+ * 折叠条看起来比相邻卡片窄一截。
+ */
+.perm-card {
+  padding: 0;
+}
+
+/* 展开后的内容区：上边框把「标题栏」和「清单」分开，视觉上才是两段 */
+.perm-body {
+  padding: 0 16px 16px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+/* 折叠条里的汇总徽章：数字用等宽字体（.badge 已内置），宽度变化不抖动 */
+#perm-summary-badge {
+  font-variant-numeric: tabular-nums;
+}
+
+.badge-warn {
+  background-color: rgba(245, 158, 11, 0.15);
+  color: var(--accent-orange);
+  border: 1px solid rgba(245, 158, 11, 0.32);
+}
+
+/* 插件加载失败：比 badge-warn 更重，因为它直接导致对话页进不去 */
+.badge-danger {
+  background-color: rgba(235, 87, 87, 0.15);
+  color: var(--accent-red);
+  border: 1px solid rgba(235, 87, 87, 0.32);
+}
+
+/*
+ * 插件页顶部告警条。
+ *
+ * 只在检测到真实加载失败时出现，所以用红系而不是中性色 —— 它回答的是
+ * 「对话页为什么进不去」，不是一般提示。按钮右对齐、不撑满，避免抢走
+ * 上面那段说明的注意力。
+ */
+.plugin-alert {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1px solid rgba(235, 87, 87, 0.35);
+  background-color: rgba(235, 87, 87, 0.08);
+}
+
+.plugin-alert-main {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+.plugin-alert-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent-red);
+}
+
+.plugin-alert-desc {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  word-break: break-all;
+}
+
+/* 已停用的插件整行降权，避免和「正在生效」的混在一起 */
+.plugin-row-off .setting-title,
+.plugin-row-off .setting-desc {
+  opacity: 0.62;
+}
+
+/* 加载失败的具体原因（来自引擎日志），等宽字体便于对齐错误栈首行 */
+.plugin-reason {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--accent-red);
+  opacity: 0.9;
+}
+
+/* 体检项里的直达按钮（例如「网页端入口」→ 插件页） */
+.check-jump {
+  align-self: flex-start;
+  margin-top: 8px;
+}
+
+/*
+ * 系统权限卡片的底部操作区（一键授予）。
+ *
+ * flex column 让子元素自动拉满宽度 —— 卡片里的次要按钮不需要
+ * `button-block`（那个类把高度固定在 44px，对辅助文案旁的按钮太高了）。
+ */
+.perm-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+/*
+ * 权限分组：卡片内按「媒体与输入 / 通知与后台 / 文件… / 短信 / 厂商开关」
+ * 分块，与系统「应用权限」页的观感对齐，用户在两处之间来回对照时不用
+ * 重新找位置。
+ */
+.perm-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-top: 14px;
+}
+
+.perm-group-title {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
+  margin-bottom: 6px;
+}
+
+.perm-group .setting-list {
+  margin-top: 0;
+  gap: 10px;
+}
+
+.perm-hint {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-muted);
+  padding: 0 2px;
+}
+
+.perm-hint b {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.segment-btn:disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+}
+
+.segment-btn:disabled:active {
+  transform: none;
+}
+
+/* 外观卡（三轮①：与官方 ui-theme 同源） */
+.appearance-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 10px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  margin-bottom: 8px;
+  transition: all var(--transition-fast);
+}
+
+.appearance-row.active {
+  border-color: rgba(65, 118, 230, 0.45);
+  background: linear-gradient(90deg, rgba(65, 118, 230, 0.10), transparent);
+}
+
+/* 权限模式卡片组（三轮③） */
+.priv-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.priv-card {
+  padding: 14px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background-color: var(--bg-elevated);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  user-select: none;
+}
+
+.priv-card.selected {
+  border-color: rgba(65, 118, 230, 0.55);
+  background: linear-gradient(135deg, rgba(65, 118, 230, 0.10), var(--bg-elevated) 60%);
+  box-shadow: 0 0 0 2px rgba(65, 118, 230, 0.30);
+}
+
+.priv-card.effective {
+  border-color: rgba(34, 197, 94, 0.4);
+}
+
+.priv-card.unavailable {
+  opacity: 0.62;
+  cursor: not-allowed;
+}
+
+/* 权限卡片头：图标 + 标题列 + 状态徽章
+   ⚠ 徽章文案长度差异极大 —— Shizuku 卡是「不可用 · 未检测到 Shizuku 管理器」，
+   Root 卡是「不可用 · 未检测到可用的 su（需 Magisk / KernelSU）」。徽章一旦
+   `flex-shrink: 0` + `white-space: nowrap`，在 412px 宽的竖屏上就会独占整行，
+   把 `.priv-titles` 挤到只剩一个字的宽度，中文于是逐字换行成一列竖排。
+   这里允许换行：徽章先尝试与标题同行，放不下就整块掉到下一行。 */
+.priv-card-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.priv-icon {
+  font-size: 20px;
+  line-height: 1.2;
+  flex-shrink: 0;
+}
+
+.priv-titles {
+  flex: 1 1 60%;
+  min-width: 8em;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.priv-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.priv-tagline {
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.priv-badge {
+  flex-shrink: 1;
+  max-width: 100%;
+  font-size: 10px;
+  font-family: var(--font-mono);
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-muted);
+  background: var(--bg-card);
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.priv-badge.badge-ok {
+  color: var(--accent-green);
+  border-color: rgba(34, 197, 94, 0.35);
+  background: rgba(34, 197, 94, 0.10);
+}
+
+.priv-badge.badge-pending {
+  color: var(--accent-orange);
+  border-color: rgba(245, 158, 11, 0.35);
+  background: rgba(245, 158, 11, 0.10);
+}
+
+.priv-badge.badge-off {
+  color: var(--accent-red);
+  border-color: rgba(239, 68, 68, 0.3);
+  background: rgba(239, 68, 68, 0.08);
+}
+
+.priv-caps {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.priv-cap {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.priv-cap-mark {
+  flex-shrink: 0;
+  width: 16px;
+  text-align: center;
+  font-weight: 700;
+}
+
+.priv-cap-mark.ok {
+  color: var(--accent-green);
+}
+
+.priv-cap-mark.warn {
+  color: var(--accent-orange);
+}
+
+.priv-cap-mark.off {
+  color: var(--text-muted);
+}
+
+/*
+ * Shizuku 通道未就绪时的原因提示。
+ *
+ * 用暖色左边框而非整块底色：这条提示会与「不可用」徽章同时出现，
+ * 再加一个色块会让卡片看起来像报错面板，而它其实是引导。
+ *
+ * 底色刻意用固定 rgba 而不是 color-mix()：color-mix 是 Chrome 111+ 的特性，
+ * 本工程的目标设备里存在 WebView 104（见 README 缺陷 I/J），
+ * 用了会整条声明被丢弃、提示块没有底色。
+ */
+.priv-hint {
+  margin-top: 10px;
+  padding: 6px 10px;
+  border-left: 2px solid var(--accent-orange);
+  background-color: rgba(242, 153, 74, 0.08);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* 「请求授权」按钮：与 priv-hint 之间留出间距，避免贴成一块 */
+.priv-card > .button {
+  margin-top: 10px;
+}
+
+.priv-apply {
+  margin-top: 4px;
+}
+
+.priv-apply:disabled {
+  opacity: 0.5;
+}
+
+.code-font {
+  font-family: var(--font-mono);
+}
+
+/* 设置视图：分段控件 */
+.segmented-control,
+.priv-mode-segment {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  background-color: var(--bg-elevated);
+  padding: 4px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  margin: 12px 0 8px 0;
+}
+
+.segment-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 4px;
+  min-height: var(--touch-min);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  color: var(--text-secondary);
+  user-select: none;
+}
+
+.segment-btn:active {
+  transform: scale(0.97);
+}
+
+.segment-btn.active {
+  background-color: var(--bg-card);
+  color: var(--text-primary);
+  border-color: rgba(47, 128, 237, 0.4);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.seg-title {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.segment-btn.active .seg-title {
+  color: var(--accent-blue);
+}
+
+.seg-sub {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.segment-hint,
+.priv-mode-description {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.4;
+  padding: 4px 2px;
+}
+
+/* 设置行与列表 */
+.setting-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 8px;
+}
+
+.setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.setting-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.setting-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.setting-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.setting-desc {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* 开关 Toggle Switch */
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 48px;
+  height: 28px;
+  min-height: 28px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+
+#toggle-foreground,
+.toggle-foreground,
+#toggle-watchdog,
+.toggle-watchdog,
+#toggle-lan,
+.toggle-lan {
+  cursor: pointer;
+}
+
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--bg-elevated);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-pill);
+  transition: all var(--transition-normal);
+}
+
+.toggle-slider::before {
+  position: absolute;
+  content: "";
+  height: 20px;
+  width: 20px;
+  left: 3px;
+  bottom: 3px;
+  background-color: var(--text-secondary);
+  border-radius: 50%;
+  transition: all var(--transition-normal);
+}
+
+.toggle-switch input:checked + .toggle-slider {
+  background-color: var(--accent-blue);
+  border-color: var(--accent-blue);
+}
+
+.toggle-switch input:checked + .toggle-slider::before {
+  transform: translateX(20px);
+  background-color: #FFFFFF;
+}
+
+.toggle-switch:active .toggle-slider::before {
+  width: 24px;
+}
+
+/* 宿主信息表格 */
+.info-table {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.info-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  font-size: 12px;
+}
+
+.info-row:last-child {
+  border-bottom: none;
+}
+
+.info-key {
+  color: var(--text-secondary);
+}
+
+.info-val {
+  color: var(--text-primary);
+  font-weight: 500;
+  text-align: right;
+}
+
+/* 危险操作区 */
+.danger-zone-card {
+  border-color: rgba(235, 87, 87, 0.25);
+}
+
+.danger-title {
+  color: var(--accent-red);
+}
+
+.danger-actions-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+/* 底部 Tab 导航栏 */
+.app-tabbar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: calc(var(--tabbar-height) + env(safe-area-inset-bottom, 0px));
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  z-index: 100;
+  background-color: var(--bg-overlay);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid var(--border-subtle);
+  display: flex;
+  justify-content: center;
+}
+
+.tabbar-inner {
+  width: 100%;
+  max-width: 480px;
+  height: var(--tabbar-height);
+  /* ⚠ 这里**不能**写死列数。原先写的是 `repeat(4, 1fr)`，与当时的四个页签
+     （概览/扩展/终端/设置）对齐；删掉「终端」页后只剩三个页签，第四列空着
+     —— 底部导航右侧就多出一块很显眼的空白。
+     改用 `grid-auto-flow: column` + `grid-auto-columns: 1fr`：列数由子元素
+     个数决定，以后再增删页签都不会留下空列。 */
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  align-items: center;
+}
+
+.tab-item {
+  background: none;
+  border: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  height: 100%;
+  min-height: var(--touch-min);
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: all var(--transition-fast);
+  user-select: none;
+}
+
+.tab-item:active {
+  transform: scale(0.92);
+}
+
+.tab-item.active {
+  color: var(--accent-blue);
+}
+
+.tab-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform var(--transition-fast);
+}
+
+.tab-item.active .tab-icon {
+  transform: translateY(-1px);
+}
+
+.tab-label {
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+/* 浮动通知条 (Toast) */
+.toast-container {
+  position: fixed;
+  top: calc(var(--header-height) + env(safe-area-inset-top, 0px) + 12px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 200;
+  width: calc(100% - 32px);
+  max-width: 440px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.toast-item {
+  pointer-events: auto;
+  background-color: var(--bg-elevated);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--text-primary);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+  animation: toastSlideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: opacity 0.3s, transform 0.3s;
+}
+
+.toast-item.toast-fade-out {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+.toast-success {
+  border-color: rgba(39, 174, 96, 0.4);
+  background: linear-gradient(90deg, rgba(39, 174, 96, 0.15), var(--bg-elevated));
+}
+
+.toast-error {
+  border-color: rgba(235, 87, 87, 0.4);
+  background: linear-gradient(90deg, rgba(235, 87, 87, 0.15), var(--bg-elevated));
+}
+
+.toast-info {
+  border-color: rgba(47, 128, 237, 0.4);
+  background: linear-gradient(90deg, rgba(47, 128, 237, 0.15), var(--bg-elevated));
+}
+
+.toast-warning {
+  border-color: rgba(242, 153, 74, 0.4);
+  background: linear-gradient(90deg, rgba(242, 153, 74, 0.15), var(--bg-elevated));
+}
+
+@keyframes toastSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-16px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* 移动端输入框字号保底 (防 iOS 缩放) */
+input, textarea, select {
+  font-size: 16px;
+}
+
+/* ==========================================================================
+   体检页（方案 K 常驻形态）
+   ==========================================================================
+
+   设计取舍：
+   · 结论先行 —— 顶部一个环形指示器 + 一句话结论。用户点进来 0.5 秒内就
+     知道「有没有事」，不需要读六行检查项。
+   · 检查项按「引擎读取顺序」排列（profile 补丁 → home 补丁 → 清单 → 覆盖层
+     → 扩展 → 运行时），因为排查时人也是按这个顺序想问题的。
+   · 三态配色：OK 绿 / BAD 红 / UNKNOWN 灰。**UNKNOWN 不能是绿也不能是红**
+     —— 那是「我没法验证」，把它染成任何一色都是骗人。
+   · 修复按钮的力度标签必须直白写「会丢什么」，因为 L1 会移走用户手写的
+     配置。吓人一点比事后解释好。
+   ========================================================================== */
+
+.health-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.health-hero-main {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+/* 环形指示器：44×44，SVG 描边做进度圈。
+   ring-fill 用 stroke-dasharray 画 3/4 圈（周长 ≈ 119.4，取 90 可见）。 */
+.health-ring {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+}
+
+.health-ring svg {
+  width: 44px;
+  height: 44px;
+  transform: rotate(-90deg);
+}
+
+.health-ring .ring-track {
+  fill: none;
+  stroke: var(--border-subtle);
+  stroke-width: 4;
+}
+
+.health-ring .ring-fill {
+  fill: none;
+  stroke: var(--text-muted);
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-dasharray: 90 119.4;
+  transition: stroke var(--transition-normal), stroke-dasharray var(--transition-normal);
+}
+
+.health-ring[data-state="ok"] .ring-fill {
+  stroke: var(--accent-green);
+  stroke-dasharray: 119.4 119.4;
+}
+
+.health-ring[data-state="bad"] .ring-fill {
+  stroke: var(--accent-red);
+  stroke-dasharray: 119.4 119.4;
+}
+
+.health-ring[data-state="warn"] .ring-fill {
+  stroke: var(--accent-orange);
+  stroke-dasharray: 90 119.4;
+}
+
+.health-ring-icon {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.health-ring[data-state="ok"] .health-ring-icon { color: var(--accent-green); }
+.health-ring[data-state="bad"] .health-ring-icon { color: var(--accent-red); }
+.health-ring[data-state="warn"] .health-ring-icon { color: var(--accent-orange); }
+
+.health-hero-text {
+  min-width: 0;
+}
+
+.health-headline {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+  line-height: 1.35;
+}
+
+.health-subline {
+  display: block;
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 3px;
+  line-height: 1.4;
+}
+
+/* 体检项的三态图标。复用 .check-status-icon 的尺寸，只覆盖配色。 */
+.check-status-icon.unknown {
+  background-color: var(--bg-elevated);
+  color: var(--text-muted);
+  border: 1px solid var(--border-subtle);
+}
+
+/*
+ * 第四态：提示（WARN）。
+ *
+ * 与 BAD 刻意分开 —— 它表示「有事发生，但已经自动兜住了」（典型：插件抛的
+ * 异常被引擎兜底接住，进程没死）。染成红色会让用户去点「修复启动」，而修复
+ * 动的是 profile 补丁，跟插件的运行时错误毫无关系；染成绿色又等于把问题藏了。
+ */
+.check-status-icon.warn {
+  background-color: rgba(245, 158, 11, 0.15);
+  color: var(--accent-orange);
+  border: 1px solid rgba(245, 158, 11, 0.32);
+}
+
+/* 检查项里「修复建议」那一行：单独一种颜色，别和 detail 混在一起。 */
+.check-fixhint {
+  font-size: 11px;
+  color: var(--accent-orange);
+  margin-top: 4px;
+  line-height: 1.45;
+}
+
+/* 修复力度选择：三档纵向排列，每档一行标题 + 一行后果说明。 */
+.repair-levels {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.repair-level {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  text-align: left;
+  padding: 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+
+.repair-level:active {
+  background: var(--bg-hover);
+}
+
+/* 推荐档高亮：用户不需要自己判断该用哪一档。 */
+.repair-level.recommended {
+  border-color: var(--accent-blue);
+  background: rgba(65, 118, 230, 0.10);
+}
+
+.repair-level[disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.repair-level-badge {
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  background: var(--bg-card);
+  border: 1px solid var(--border-strong);
+  color: var(--text-secondary);
+}
+
+.repair-level.recommended .repair-level-badge {
+  background: var(--accent-blue);
+  border-color: var(--accent-blue);
+  color: #fff;
+}
+
+/* L3 是危险档：红色描边，视觉上明确区分。 */
+.repair-level.danger .repair-level-badge {
+  border-color: rgba(235, 87, 87, 0.5);
+  color: var(--accent-red);
+}
+
+.repair-level-text {
+  min-width: 0;
+  flex: 1;
+}
+
+.repair-level-title {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.repair-level-desc {
+  display: block;
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 2px;
+  line-height: 1.4;
+}
+
+.repair-level-arrow {
+  flex-shrink: 0;
+  color: var(--text-muted);
+}
+
+.repair-foot {
+  margin-top: 10px;
+}
+
+/* 上次修复的改动清单 */
+.repair-changes {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.repair-change-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.45;
+}
+
+.repair-change-dot {
+  flex-shrink: 0;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--accent-blue);
+  margin-top: 6px;
+}
+
+/* 修复进行中提示条 */
+.health-busy-inner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.health-busy-spinner {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid var(--border-strong);
+  border-top-color: var(--accent-blue);
+  animation: healthSpin 0.8s linear infinite;
+}
+
+@keyframes healthSpin {
+  to { transform: rotate(360deg); }
+}
+
+.health-busy-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.health-busy-desc {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   待确认请求卡片（方案 B3）
+
+   设计取向与「确认弹窗」（.confirm-dialog）保持一致：卡片本身是中性底色，
+   语义色只通过 --attention-accent 与 --attention-accent-rgb 两个变量表达，
+   换 kind 时只改变量、不改结构 —— 这样四种状态看起来是同一套东西的四种
+   语气，而不是四张各画各的卡片。
+
+   刻意放在 prefers-reduced-motion 之前：让「减少动效」的系统设置能覆盖
+   下面这条入场动画。
+   ══════════════════════════════════════════════════════════════════════ */
+
+.attention-host {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+/* 显式写 display:none：UA 的 [hidden] 只是 display:none 的低优先级声明，
+   一旦上面给了 display:flex 就会被盖掉 —— 这是「隐藏了却还占位」的经典坑。 */
+.attention-host[hidden] {
+  display: none;
+}
+
+.attention-card {
+  --attention-accent: var(--accent-orange);
+  --attention-accent-rgb: 245, 158, 11;
+
+  position: relative;
+  display: flex;
+  gap: 12px;
+  padding: 14px 14px 14px 17px;
+  border-radius: var(--radius-lg);
+  background-color: var(--bg-card);
+  background-image: linear-gradient(
+    135deg,
+    rgba(var(--attention-accent-rgb), 0.12),
+    rgba(var(--attention-accent-rgb), 0.03) 46%,
+    transparent 74%
+  );
+  border: 1px solid rgba(var(--attention-accent-rgb), 0.24);
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.20);
+  overflow: hidden;
+  animation: attentionCardIn 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* 左侧强调条：一眼分辨「这条是要我动手的」而不是普通信息卡。
+   用伪元素而不是 border-left，因为需要渐变淡出。 */
+.attention-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: linear-gradient(
+    180deg,
+    var(--attention-accent),
+    rgba(var(--attention-accent-rgb), 0.22)
+  );
+}
+
+.attention-card[data-kind="permission"] {
+  --attention-accent: var(--accent-blue);
+  --attention-accent-rgb: 65, 118, 230;
+}
+
+.attention-card[data-kind="failed"] {
+  --attention-accent: var(--accent-red);
+  --attention-accent-rgb: 239, 68, 68;
+}
+
+.attention-card[data-kind="done"] {
+  --attention-accent: var(--accent-green);
+  --attention-accent-rgb: 34, 197, 94;
+}
+
+.attention-glyph {
+  flex: 0 0 auto;
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  color: var(--attention-accent);
+  background: rgba(var(--attention-accent-rgb), 0.14);
+  border: 1px solid rgba(var(--attention-accent-rgb), 0.26);
+}
+
+.attention-main {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.attention-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.attention-kicker {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--attention-accent);
+}
+
+.attention-time {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.attention-title {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.45;
+  color: var(--text-primary);
+  /* 标题最多两行：再长就把按钮挤出屏幕了 */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.attention-body {
+  margin-top: 3px;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--text-secondary);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
+}
+
+.attention-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 11px;
+}
+
+/* 卡片里的按钮比常规按钮矮一点：手机上这个卡片要尽量少占竖向空间。 */
+.attention-actions .button {
+  min-height: 34px;
+  padding: 0 14px;
+  border-radius: var(--radius-pill);
+  font-size: 13px;
+}
+
+@keyframes attentionCardIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.99);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* 动效降级偏好支持 */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+  .pulse-dot::after,
+  .pulse-dot-large::after {
+    animation: none !important;
+    opacity: 0.4 !important;
+  }
+}

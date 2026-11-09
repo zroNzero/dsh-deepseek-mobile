@@ -1,0 +1,62 @@
+/* DSH mobile shell — layout-only injection for the official Web UI.
+ *
+ * The official AppFrame already switches the sidebar to a drawer below 768px
+ * (`data-sidebar-drawer` + mask + leading-seat toggle). We therefore must NOT
+ * hide the sidebar, workspace list, tool cards, or settings: those are native
+ * host surfaces and stay exactly as the official build renders them.
+ *
+ * This sheet only changes the composer's outer surface on phones.
+ */
+
+@media (max-width: 767px) {
+  html,
+  body {
+    overscroll-behavior-y: none;
+  }
+
+  /* Floating capsule: 28px radius, elevated dark surface, safe-area inset. */
+  [data-composer-card] {
+    border-radius: 28px !important;
+    background: var(--dsw-alias-bg-elevated, #1b1b1f) !important;
+    border: 1px solid var(--dsw-alias-border-subtle, rgba(255, 255, 255, 0.08)) !important;
+    box-shadow:
+      0 10px 30px rgba(0, 0, 0, 0.45),
+      0 2px 8px rgba(0, 0, 0, 0.28) !important;
+    margin-bottom: calc(4px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  [data-composer-card] [contenteditable='true'] {
+    caret-color: var(--dsw-alias-brand-primary, #4d6bfe);
+  }
+
+  /* Keep the host's own drawer toggle tappable without a focus flash. */
+  [data-sidebar-toggle] {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /*
+   * 双重黑遮罩修复（iQOO 实机）。
+   *
+   * 官方 AppFrame 的 .drawerMask 同时用了半透明底色 + backdrop-filter: blur。
+   * Android WebView 在部分机型上会把 backdrop-filter 渲染成第二层不透明黑，
+   * 与底色叠成「黑盖子」。这里只保留官方唯一的 mask 节点，强制纯半透明、
+   * 关闭 blur，并钉死抽屉与遮罩的层级；不新增任何自绘遮罩。
+   */
+  [data-sidebar-mask] {
+    z-index: 70 !important;
+    background: rgba(0, 0, 0, 0.42) !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    opacity: 1 !important;
+  }
+
+  [data-sidebar-mask]::before,
+  [data-sidebar-mask]::after {
+    content: none !important;
+    display: none !important;
+  }
+
+  [data-sidebar-drawer] .sidebarCol {
+    z-index: 71 !important;
+  }
+}

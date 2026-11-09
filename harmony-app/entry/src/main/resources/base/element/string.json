@@ -1,0 +1,16 @@
+{
+  "string": [
+    {
+      "name": "app_name",
+      "value": "DeepSeek Harness"
+    },
+    {
+      "name": "module_desc",
+      "value": "DeepSeek Harness local Node runtime"
+    },
+    {
+      "name": "ability_desc",
+      "value": "DeepSeek Harness entry ability"
+    }
+  ]
+}

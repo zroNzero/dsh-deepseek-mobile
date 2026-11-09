@@ -1,0 +1,24 @@
+{
+  "schema": 1,
+  "generatedBy": "DSH-DeepSeek assembleDebug",
+  "plugins": [
+    {
+      "id": "dsh-one-sync",
+      "version": "1.2.0",
+      "bundled": true,
+      "entry": "./dsh-one-sync/index.js",
+      "client": "./dsh-one-sync/client.js",
+      "patch": "./dsh-one-sync/cordis.patch.yml",
+      "description": "DSH 一键同步：Git 代码拉取/推送 + DSH 状态加密上传/拉取"
+    },
+    {
+      "id": "dsh-mobile-shell",
+      "version": "0.7.5",
+      "bundled": true,
+      "entry": "./dsh-mobile-shell/lib/index.js",
+      "client": "./dsh-mobile-shell/lib/client.js",
+      "patch": "./dsh-mobile-shell/cordis.patch.yml",
+      "description": "官方 App 风格移动端外壳：抽屉导航、App 式输入框、设置页与 Android 返回栈"
+    }
+  ]
+}
