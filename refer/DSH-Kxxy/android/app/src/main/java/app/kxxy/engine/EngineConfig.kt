@@ -1358,6 +1358,12 @@ object EngineConfig {
         - insert:
             - id: kxxy-host
               name: kxxy-host
+            - id: cloud-github
+              name: 'file://${engineRoot(ctx).absolutePath}/lib/node_modules/cloud-github.mjs'
+              config:
+                settingsPath: ${dshHome(ctx).absolutePath}/cloud-github.json
+                profileDir: ${profileDir(ctx).absolutePath}
+                cloudOnly: false
     """.trimIndent() + "\n"
 
     /** 确保覆盖层文件存在且内容最新（幂等，内容比对后才写）。 */

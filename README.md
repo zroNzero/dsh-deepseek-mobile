@@ -59,6 +59,7 @@ harmony-app\build-hap.cmd
 ## 已知限制
 
 - 仅 arm64。
+- Android 本地 bash/git/pnpm 全开。
 - HarmonyOS 无 pnpm、git、本地 shell。
 - 插件安装仅支持无第三方依赖的插件。
 - HarmonyOS 代码同步需远端完成。

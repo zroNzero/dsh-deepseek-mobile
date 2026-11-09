@@ -362,6 +362,7 @@ async function writeFile(config, args) {
 }
 
 export function apply(ctx, config = {}) {
+  const cloudOnly = config.cloudOnly !== false;
   console.log('[cloud-github] plugin active');
   ctx.tools.register(defineTool({
     name: 'gh_list_files',
@@ -445,7 +446,7 @@ export function apply(ctx, config = {}) {
     execute: (args) => installPlugin(config, args),
   }));
   ctx.tools.guard((exec) => {
-    if (LOCAL_TOOLS.has(exec.name)) {
+    if (cloudOnly && LOCAL_TOOLS.has(exec.name)) {
       return `Cloud GitHub mode: local tool "${exec.name}" is disabled. Use gh_list_files, gh_read_file, or gh_write_file.`;
     }
   });
@@ -478,18 +479,25 @@ export function apply(ctx, config = {}) {
       },
     }), 'cloud-github: local plugin installer');
   });
+  const promptText = cloudOnly ? [
+    '<cloud_github_mode>',
+    'You are in Cloud GitHub mode. There is no local code repository on this device.',
+    'All repository reads and writes MUST use gh_list_files, gh_read_file, and gh_write_file.',
+    'Do not use local filesystem tools, shell/terminal tools, package managers, or background job tools; they are disabled.',
+    'gh_write_file creates a commit directly on the configured branch. Read a file before modifying it, write the complete new content, and use a clear commit message.',
+    'pnpm and external package managers are unavailable. To install a dependency-free DSH plugin, use gh_install_plugin with its GitHub repo; restart the app afterwards.',
+    'If a tool reports that GitHub is not configured, tell the user to open Cloud GitHub settings and save a fine-grained PAT with Contents read/write access plus owner/repo.',
+    '</cloud_github_mode>',
+  ].join('\n') : [
+    '<local_github_tools>',
+    'Local filesystem, shell, git and pnpm tools are enabled.',
+    'Use gh_list_files, gh_read_file and gh_write_file for GitHub operations.',
+    '</local_github_tools>',
+  ].join('\n');
+
   ctx.systemPrompt.section({
     name: 'cloud-github:mode',
     order: ctx.systemPrompt.getSectionOrder('TOOL_GOAL'),
-    text: [
-      '<cloud_github_mode>',
-      'You are in Cloud GitHub mode. There is no local code repository on this device.',
-      'All repository reads and writes MUST use gh_list_files, gh_read_file, and gh_write_file.',
-      'Do not use local filesystem tools, shell/terminal tools, package managers, or background job tools; they are disabled.',
-      'gh_write_file creates a commit directly on the configured branch. Read a file before modifying it, write the complete new content, and use a clear commit message.',
-      'pnpm and external package managers are unavailable. To install a dependency-free DSH plugin, use gh_install_plugin with its GitHub repo; restart the app afterwards.',
-      'If a tool reports that GitHub is not configured, tell the user to open Cloud GitHub settings and save a fine-grained PAT with Contents read/write access plus owner/repo.',
-      '</cloud_github_mode>',
-    ].join('\n'),
+    text: promptText,
   });
 }

@@ -93,6 +93,64 @@
     return false;
   };
 
+  function parseRgb(value) {
+    var match = /rgba?\(([^)]+)\)/.exec(value || '');
+    if (!match) return null;
+    var parts = match[1].split(',');
+    return { r: Number(parts[0]), g: Number(parts[1]), b: Number(parts[2]), a: parts.length >= 4 ? Number(parts[3]) : 1 };
+  }
+
+  function applyInputTheme() {
+    var fields = document.querySelectorAll('textarea,input,[contenteditable="true"]');
+    for (var i = 0; i < fields.length; i += 1) {
+      var node = fields[i];
+      var bg = null;
+      while (node && node !== document.documentElement) {
+        var color = parseRgb(getComputedStyle(node).backgroundColor);
+        if (color && color.a > 0.5) { bg = color; break; }
+        node = node.parentElement;
+      }
+      var dark = bg ? ((0.2126 * bg.r + 0.7152 * bg.g + 0.0722 * bg.b) / 255 < 0.5) : false;
+      var text = dark ? '#f5f5f5' : '#111111';
+      fields[i].style.setProperty('color', text, 'important');
+      fields[i].style.setProperty('-webkit-text-fill-color', text, 'important');
+      fields[i].style.setProperty('caret-color', text, 'important');
+    }
+  }
+
+  function hasVisibleDialog() {
+    var dialogs = document.querySelectorAll('[role="dialog"],[aria-modal="true"]');
+    for (var i = 0; i < dialogs.length; i += 1) if (isVisible(dialogs[i])) return true;
+    return false;
+  }
+
+  function hideStuckVeil() {
+    if (hasVisibleDialog()) return;
+    var nodes = document.querySelectorAll('body *');
+    for (var i = 0; i < nodes.length; i += 1) {
+      var el = nodes[i];
+      if (el === document.body || el === document.documentElement) continue;
+      if (el.hasAttribute('role') && el.getAttribute('role') === 'dialog') continue;
+      var style = getComputedStyle(el);
+      if (style.position !== 'fixed' && style.position !== 'absolute') continue;
+      if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) <= 0.01) continue;
+      var rect = el.getBoundingClientRect();
+      if (rect.width < window.innerWidth * 0.9 || rect.height < window.innerHeight * 0.9) continue;
+      var match = /rgba?\(([^)]+)\)/.exec(style.backgroundColor || '');
+      var alpha = match && match[1].split(',').length >= 4 ? Number(match[1].split(',')[3]) : 1;
+      var blurred = style.backdropFilter && style.backdropFilter !== 'none';
+      if (!blurred && alpha >= 0.95) continue;
+      if (alpha <= 0.05 && !blurred) continue;
+      el.style.display = 'none';
+    }
+  }
+
+  setInterval(applyInputTheme, 900);
+  setInterval(hideStuckVeil, 1800);
+  document.addEventListener('focusin', applyInputTheme, true);
+  setTimeout(applyInputTheme, 300);
+  setTimeout(hideStuckVeil, 600);
+
   dedupeMasks();
   setTimeout(dedupeMasks, 1500);
   setTimeout(dedupeMasks, 4000);

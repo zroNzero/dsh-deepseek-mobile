@@ -60,3 +60,32 @@
     z-index: 71 !important;
   }
 }
+
+/* Theme-aware composer and inputs */
+body[data-ds-dark-theme] textarea,
+body[data-ds-dark-theme] input,
+body[data-ds-dark-theme] [contenteditable='true'] {
+  color: #f5f5f5 !important;
+  caret-color: #f5f5f5 !important;
+  -webkit-text-fill-color: #f5f5f5 !important;
+}
+
+body:not([data-ds-dark-theme]) textarea,
+body:not([data-ds-dark-theme]) input,
+body:not([data-ds-dark-theme]) [contenteditable='true'] {
+  color: #111111 !important;
+  caret-color: #111111 !important;
+  -webkit-text-fill-color: #111111 !important;
+}
+
+body:not([data-ds-dark-theme]) [data-composer-card] {
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.10),
+    0 2px 8px rgba(0, 0, 0, 0.06) !important;
+}
+
+dialog::backdrop {
+  background: transparent !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
