@@ -2,8 +2,8 @@
   "app": {
     "bundleName": "com.deepseek.harness",
     "vendor": "deepseek",
-    "versionCode": 20200000,
-    "versionName": "2.2.0",
+    "versionCode": 1000000,
+    "versionName": "1.0.0",
     "icon": "$media:app_icon",
     "label": "$string:app_name"
   }
